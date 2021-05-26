@@ -1,22 +1,23 @@
 <template>
-  <div>
-    <div>ToDoList</div>
+  <div class="container">
+    <h1>ToDoList</h1>
     <div id="to-do-list">
-      <table>
+      <table style="margin: auto">
         <thead>
-          <tr><td>課題名</td><td>ステータス</td><td>完了</td></tr>
+          <tr><th>課題名</th><th>ステータス</th><th>完了</th><th>削除</th></tr>
         </thead>
         <tbody>
           <tr 
             class="task" 
             :class="{ completed: task.isCompleted }"
-            v-for="task in tasks"
-            :key="task.name"
+            v-for="task in sortedTasks"
+            :key="task.id"
           >
             <td>{{ task.name }}</td>
             <td v-if="task.isCompleted">完了済</td>
             <td v-else>未完了</td>
             <td><button @click="task.isCompleted = true">完了</button></td>
+            <td><button @click="removeTask(task.id)">削除</button></td>
           </tr>
         </tbody>
       </table>
@@ -24,36 +25,55 @@
     <div>
       <label>
         課題名
-        <input v-model="newTaskName" type="text" />
+        <input v-model="newTaskName" v-on:keyup.enter="addTask" type="text" />
       </label>
-      <button @click="addtask">add</button>
+      <button @click="addTask">add</button>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
+  import { ref, computed } from "vue";
 
-export default {
-  setup() {
-    const tasks = ref([]);
-    
-    const newTaskName = ref("");
+  export default {
+    setup() {
+      const currentId = ref(0);
+      const tasks = ref([]);
+      
+      const newTaskName = ref("");
 
-    const addtask = () => {
-      if (newTaskName.value === "") {
-        return;
-      }
-      tasks.value.push({
-        name: newTaskName.value,
-        isCompleted: false,
+      const addTask = () => {
+        if (newTaskName.value === "") {
+          return;
+        }
+        tasks.value.push({
+          id: currentId.value++,
+          name: newTaskName.value,
+          isCompleted: false,
+        });
+        newTaskName.value = "";
+      };
+
+      const removeTask = taskId => {
+        const targetTask = tasks.value.find(task => task.id === taskId);
+        tasks.value.splice(tasks.value.indexOf(targetTask), 1);
+      };
+
+      const sortedTasks = computed(() => {
+        return tasks.value.sort((a, b) => {
+          if (a.isCompleted && !b.isCompleted) {
+            return 1;
+          } else if(!a.isCompleted && b.isCompleted) {
+            return -1;
+          } else {
+            return a.id - b.id;
+          }
+        });
       });
-      newTaskName.value = "";
-    };
 
-    return { tasks, newTaskName, addtask };
-  },
-};
+      return { tasks, newTaskName, addTask, removeTask, sortedTasks };
+    },
+  };
 </script>
 
 <style>

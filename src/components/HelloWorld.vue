@@ -1,8 +1,7 @@
 <template>
   <div>
-    <h1>{{ msg }}</h1>
-    <counter />
-    <!-- <item-list /> -->
+    <!-- <h1>{{ msg }}</h1> -->
+    <!-- <counter /> -->
     <to-do-list />
   </div>
 </template>
